@@ -26,15 +26,19 @@ class GitRevisionDatePlugin(BasePlugin):
                 print('PDF export is disabled (set environment variable %s to 1 to enable)' % env_name)
                 return
 
-    def on_page_markdown(self, markdown, page, config, files):
+    def on_page_markdown(self, markdown, page, config, site_navigation):
         if not self.enabled:
             return markdown
 
-        revision_date = self.util.get_revision_date_for_file(page.file.abs_src_path)
+        filepath = "docs" + page.abs_url.replace("/index.html", ".md")
+        if filepath == "docs.md":
+            revision_date = None
+        else:
+            revision_date = self.util.get_revision_date_for_file(filepath)
 
         if not revision_date:
             revision_date = datetime.now().date().strftime('%Y-%m-%d')
-            print('WARNING -  %s has no git logs, revision date defaulting to today\'s date' % page.file.src_path)
+            print('WARNING -  %s has no git logs, revision date defaulting to today\'s date' % filepath)
 
         if self.config['as_datetime']:
             revision_date = datetime.strptime(revision_date,'%Y-%m-%d')
